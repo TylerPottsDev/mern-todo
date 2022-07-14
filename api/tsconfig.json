@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "target": "ES6",
+    "baseUrl": "./",
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": false,
+    "forceConsistentCasingInFileNames": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "incremental": true,
+    "experimentalDecorators": true,
+    "module": "commonjs",
+    "noEmit": false,
+    "paths": {
+      "@Root/*": ["./*"],
+      "@Controllers/*": ["./controllers/*"],
+      "@Models/*": ["./models/*"],
+      "@Middlewares/*": ["./middlewares/*"],
+      "@Lib/*": ["./lib/*"],
+      "@SharedTypes/*": ["../types/*"]
+    }
+  },
+  "include": ["./**/*.ts"],
+  "exclude": ["node_modules", "**/*.spec.ts"]
+}

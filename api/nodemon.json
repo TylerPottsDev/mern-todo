@@ -1,0 +1,11 @@
+{
+  "execMap": {
+    "ts": "ts-node"
+  },
+  "env": {
+    "NODE_ENV": "development"
+  },
+  "watch": [
+    "**/*.ts"
+  ]
+}

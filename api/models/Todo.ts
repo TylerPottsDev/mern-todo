@@ -1,7 +1,10 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
+import { ITodo } from '../../types/todo';
+
+
 const Schema = mongoose.Schema;
 
-const TodoSchema = new Schema({
+const TodoSchema = new Schema<ITodo>({
 	text: {
 		type: String,
 		required: true
@@ -16,6 +19,4 @@ const TodoSchema = new Schema({
 	}
 });
 
-const Todo = mongoose.model("Todo", TodoSchema);
-
-module.exports = Todo;
+export const TodoModel = mongoose.model<ITodo>("Todo", TodoSchema);
