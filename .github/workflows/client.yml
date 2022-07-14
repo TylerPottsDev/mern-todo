@@ -32,7 +32,7 @@ jobs:
           node-version: 16.x
 
       - name: Install app dependencies
-        if: steps.node_modules_cache_v1.outputs.cache-hit != 'true'
+        # if: steps.node_modules_cache_v1.outputs.cache-hit != 'true'
         run: npm ci
 
       - name: Ls
