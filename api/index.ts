@@ -20,12 +20,17 @@ AwsSecretManager.attachToProcessEnv('MernProd').then(() => {
 	}).then(() => {
 
 		console.log("Connected to MongoDB");
-
-		app.use('/api', apiRouter);
-
-		app.listen(port, () => {
-			console.log(`Started on ${port}`);
-		});
 	}).catch(console.error);
 
+
+	app.use('/api', apiRouter);
+	app.use('/stress', (req, res) => {
+		console.log('stress');
+
+		res.status(200).send('OK');
+	});
+
+	app.listen(port, () => {
+		console.log(`Started on ${port}`);
+	});
 });
