@@ -20,20 +20,20 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Cache "node_modules" directory
-        id: node_modules_cache
-        uses: actions/cache@v2
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-${{ hashFiles('package.json') }}
-
       - name: Setup Node.js
         uses: actions/setup-node@v1
         with:
           node-version: 16.x
 
+      - name: Cache "node_modules" directory
+        id: client_node_modules_cache
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-${{ hashFiles('package.json') }}
+
       - name: Install app dependencies
-        if: steps.node_modules_cache.outputs.cache-hit != 'true'
+        if: steps.client_node_modules_cache.outputs.cache-hit != 'true'
         run: npm ci
 
       - name: Build the App
