@@ -1,0 +1,68 @@
+name: Client CI/CD
+
+env: 
+  CLIENT_BUCKET_NAME: 'mern-todo-hosting'
+  AWS_REGION: 'us-east-1'
+  
+
+defaults:
+  run:
+    shell: bash
+    working-directory: client
+
+on:
+  push:
+    branches:
+      - ci
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Cache "node_modules" directory
+        id: node_modules_cache_v1
+        uses: actions/cache@v2
+        with:
+          path: |
+            node_modules
+          key: ${{ runner.os }}-${{ hashFiles('package.json') }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 16.x
+
+      - name: Install app dependencies
+        if: steps.node_modules_cache_v1.outputs.cache-hit != 'true'
+        run: npm install
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Run tests
+        run: npm test
+
+  # deploy:
+  #   needs: [build]
+  #   name: Upload to Amazon S3
+  #   runs-on: ubuntu-latest
+  #   permissions:
+  #     id-token: write
+  #     contents: read
+
+  #   steps:
+  #     - uses: actions/checkout@v2
+
+  #     - name: Configure AWS credentials
+  #     uses: aws-actions/configure-aws-credentials@v1
+  #     with:
+  #       role-to-assume: arn:aws:iam::111111111111:role/my-github-actions-role-test
+  #       aws-region: us-east-1
