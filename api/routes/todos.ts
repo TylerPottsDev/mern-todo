@@ -16,6 +16,6 @@ todoRouter.post('/', httpErrorHandlers(createTodoController));
 todoRouter.put('/:id', httpErrorHandlers(updateTodoController));
 todoRouter.delete('/:id', httpErrorHandlers(deleteTodoController));
 // actions
-todoRouter.post('/:id/toggle-completion', httpErrorHandlers(toggleCompletionTodoController));
+todoRouter.put('/:id/toggle-completion', httpErrorHandlers(toggleCompletionTodoController));
 
 export { todoRouter };

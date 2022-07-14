@@ -6,12 +6,11 @@ env:
   CLIENT_WORKING_DIR: ${{ github.workspace }}/client
   API_WORKING_DIR: ${{ github.workspace }}/api
   DOCKER_REGISTRY: 251588601444.dkr.ecr.us-east-1.amazonaws.com/mern
-  DOCKER_IMAGE_TAG: latest
-  LOCAL_TAG: mern:latest
+  DOCKER_IMAGE_TAG: ${{ github.sha }}
+  LOCAL_TAG: mern:${{ github.sha }}
   ECS_CONTAINER_NAME: mern-api-container
   ECS_CLUSTER_NAME: Mern-Cluster
   ECS_SERVICE_NAME: Mern-Service
-#  ${{ github.sha }}
 on:
   push:
     branches:
@@ -56,49 +55,48 @@ jobs:
           name: client_build
           path: ${{ env.CLIENT_WORKING_DIR }}/build
 
-  # api_build_and_test:
-  #   name: Build & Test API
-  #   runs-on: ubuntu-latest
-  #   defaults:
-  #     run:
-  #       working-directory: ${{ env.API_WORKING_DIR }}
-  #   steps:
-  #     - uses: actions/checkout@v2
+  api_build_and_test:
+    name: Build & Test API
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ env.API_WORKING_DIR }}
+    steps:
+      - uses: actions/checkout@v2
 
-  #     - name: Setup Node.js
-  #       uses: actions/setup-node@v1
-  #       with:
-  #         node-version: 16.x
+      - name: Setup Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 16.x
 
-  #     - name: Cache "node_modules" directory
-  #       id: api_node_modules_cache
-  #       uses: actions/cache@v3
-  #       with:
-  #         path: ${{ env.API_WORKING_DIR }}/node_modules
-  #         key: api-${{ runner.os }}-${{ hashFiles('./api/package.json') }}
+      - name: Cache "node_modules" directory
+        id: api_node_modules_cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.API_WORKING_DIR }}/node_modules
+          key: api-${{ runner.os }}-${{ hashFiles('./api/package.json') }}
 
-  #     - name: Install app dependencies
-  #       if: steps.api_node_modules_cache.outputs.cache-hit != 'true'
-  #       run: npm ci
+      - name: Install app dependencies
+        if: steps.api_node_modules_cache.outputs.cache-hit != 'true'
+        run: npm ci
 
-  #     - name: Build the App
-  #       run: npm run build
+      - name: Build the App
+        run: npm run build
 
-  #     - name: Test the App
-  #       run: npm run test
+      - name: Test the App
+        run: npm run test
 
-  #     # Share artifact inside workflow
-  #     - name: Share artifact inside workflow
-  #       uses: actions/upload-artifact@v3
-  #       with:
-  #         name: api_build
-  #         path: ${{ env.API_WORKING_DIR }}/build
+      # Share artifact inside workflow
+      - name: Share artifact inside workflow
+        uses: actions/upload-artifact@v3
+        with:
+          name: api_build
+          path: ${{ env.API_WORKING_DIR }}/build
 
   client_deploy:
     name: Deploy Client
     runs-on: ubuntu-latest
-    needs: [client_build_and_test]
-    # needs: [client_build_and_test, api_build_and_test]
+    needs: [client_build_and_test, api_build_and_test]
     steps:
       - name: Get Client Build Artifact
         uses: actions/download-artifact@v1
@@ -116,51 +114,51 @@ jobs:
         run: aws s3 sync . s3://${{ env.CLIENT_BUCKET_NAME }}
         working-directory: client_build
 
-  # api_deploy:
-  #   name: Deploy API
-  #   runs-on: ubuntu-latest
-  #   needs: [client_build_and_test, api_build_and_test]
-  #   defaults:
-  #     run:
-  #       working-directory: ${{ env.API_WORKING_DIR }}
-  #   steps:
-  #     - uses: actions/checkout@v2
+  api_deploy:
+    name: Deploy API
+    runs-on: ubuntu-latest
+    needs: [client_build_and_test, api_build_and_test]
+    defaults:
+      run:
+        working-directory: ${{ env.API_WORKING_DIR }}
+    steps:
+      - uses: actions/checkout@v2
 
-  #     - name: Configure AWS credentials
-  #       uses: aws-actions/configure-aws-credentials@v1
-  #       with:
-  #         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  #         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  #         aws-region: ${{ env.AWS_REGION }}
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
 
-  #     - name: Login to Amazon ECR
-  #       id: login-ecr
-  #       uses: aws-actions/amazon-ecr-login@v1
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
 
-  #     - name: Build, tag, and push docker image to Amazon ECR
-  #       id: build-image
-  #       env:
-  #         DOCKER_ECR_IMAGE_URL: ${{ env.DOCKER_REGISTRY }}:${{ env.DOCKER_IMAGE_TAG }}
-  #       run: |
-  #         DOCKER_BUILDKIT=1 docker build -t ${{ env.DOCKER_ECR_IMAGE_URL }} .
-  #         docker push ${{ env.DOCKER_ECR_IMAGE_URL }}
+      - name: Build, tag, and push docker image to Amazon ECR
+        id: build-image
+        env:
+          DOCKER_ECR_IMAGE_URL: ${{ env.DOCKER_REGISTRY }}:${{ env.DOCKER_IMAGE_TAG }}
+        run: |
+          DOCKER_BUILDKIT=1 docker build -t ${{ env.DOCKER_ECR_IMAGE_URL }} .
+          docker push ${{ env.DOCKER_ECR_IMAGE_URL }}
 
-  #     - name: ls
-  #       run: ls -la
+      - name: ls
+        run: ls -la
 
-  #     - name: Fill in the new image ID in the Amazon ECS task definition
-  #       id: task-def
-  #       env:
-  #         DOCKER_ECR_IMAGE_URL: ${{ env.DOCKER_REGISTRY }}:${{ env.DOCKER_IMAGE_TAG }}
-  #       uses: aws-actions/amazon-ecs-render-task-definition@v1
-  #       with:
-  #         task-definition: ${{ env.API_WORKING_DIR }}/task-definition.json
-  #         container-name: mern-api-container
-  #         image: ${{ env.DOCKER_ECR_IMAGE_URL }}
-  #     - name: Deploy Amazon ECS task definition
-  #       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-  #       with:
-  #         task-definition: ${{ steps.task-def.outputs.task-definition }}
-  #         cluster: ${{ env.ECS_CLUSTER_NAME }}
-  #         service: ${{ env.ECS_SERVICE_NAME }}
-  #         wait-for-service-stability: true
+      - name: Fill in the new image ID in the Amazon ECS task definition
+        id: task-def
+        env:
+          DOCKER_ECR_IMAGE_URL: ${{ env.DOCKER_REGISTRY }}:${{ env.DOCKER_IMAGE_TAG }}
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ env.API_WORKING_DIR }}/task-definition.json
+          container-name: mern-api-container
+          image: ${{ env.DOCKER_ECR_IMAGE_URL }}
+      - name: Deploy Amazon ECS task definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          cluster: ${{ env.ECS_CLUSTER_NAME }}
+          service: ${{ env.ECS_SERVICE_NAME }}
+          wait-for-service-stability: true

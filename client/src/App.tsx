@@ -18,9 +18,12 @@ function App() {
   };
 
   const completeTodo = async (id: string) => {
-    const data = await fetch(`${api_base}/todos/${id}/toggle-completion`).then((res) =>
-      res.json()
-    );
+    const data = await fetch(`${api_base}/todos/${id}/toggle-completion`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }).then((res) => res.json());
 
     setTodos((todos: any[]) =>
       todos.map((todo) => {
@@ -77,7 +80,14 @@ function App() {
 
               <div className="text">{todo.text}</div>
 
-              <div className="delete-todo" onClick={() => deleteTodo(todo._id)}>
+              <div
+                className="delete-todo"
+                onClick={(e) => {
+                  e.stopPropagation();
+
+                  deleteTodo(todo._id);
+                }}
+              >
                 x
               </div>
             </div>
