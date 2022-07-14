@@ -5,6 +5,8 @@ env:
   AWS_REGION: "us-east-1"
   CLIENT_WORKING_DIR: "./client"
   API_WORKING_DIR: "./api"
+  DOCKER_REGISTRY: 251588601444.dkr.ecr.us-east-1.amazonaws.com/mern
+  LOCAL_TAG: mern:latest
 
 on:
   push:
@@ -12,43 +14,43 @@ on:
       - ci
 
 jobs:
-  client_build_and_test:
-    name: Build & Test Client
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ${{ env.CLIENT_WORKING_DIR }}
-    steps:
-      - uses: actions/checkout@v2
+  # client_build_and_test:
+  #   name: Build & Test Client
+  #   runs-on: ubuntu-latest
+  #   defaults:
+  #     run:
+  #       working-directory: ${{ env.CLIENT_WORKING_DIR }}
+  #   steps:
+  #     - uses: actions/checkout@v2
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v1
-        with:
-          node-version: 16.x
+  #     - name: Setup Node.js
+  #       uses: actions/setup-node@v1
+  #       with:
+  #         node-version: 16.x
 
-      - name: Cache "node_modules" directory
-        id: client_node_modules_cache
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.CLIENT_WORKING_DIR }}/node_modules
-          key: client-${{ runner.os }}-${{ hashFiles('./client/package.json') }}
+  #     - name: Cache "node_modules" directory
+  #       id: client_node_modules_cache
+  #       uses: actions/cache@v3
+  #       with:
+  #         path: ${{ env.CLIENT_WORKING_DIR }}/node_modules
+  #         key: client-${{ runner.os }}-${{ hashFiles('./client/package.json') }}
 
-      - name: Install app dependencies
-        if: steps.client_node_modules_cache.outputs.cache-hit != 'true'
-        run: npm ci
+  #     - name: Install app dependencies
+  #       if: steps.client_node_modules_cache.outputs.cache-hit != 'true'
+  #       run: npm ci
 
-      - name: Build the App
-        run: npm run build
+  #     - name: Build the App
+  #       run: npm run build
 
-      - name: Test the App
-        run: npm run test
+  #     - name: Test the App
+  #       run: npm run test
 
-      # Share artifact inside workflow
-      - name: Share artifact inside workflow
-        uses: actions/upload-artifact@v3
-        with:
-          name: client_build
-          path: ${{ env.CLIENT_WORKING_DIR }}/build
+  #     # Share artifact inside workflow
+  #     - name: Share artifact inside workflow
+  #       uses: actions/upload-artifact@v3
+  #       with:
+  #         name: client_build
+  #         path: ${{ env.CLIENT_WORKING_DIR }}/build
 
   api_build_and_test:
     name: Build & Test API
@@ -88,16 +90,38 @@ jobs:
           name: api_build
           path: ${{ env.API_WORKING_DIR }}/build
 
-  client_deploy:
-    name: Deploy Client
-    runs-on: ubuntu-latest
-    needs: [client_build_and_test, api_build_and_test]
-    steps:
+  # client_deploy:
+  #   name: Deploy Client
+  #   runs-on: ubuntu-latest
+  #   needs: [client_build_and_test, api_build_and_test]
+  #   steps:
 
-      - name: Get Client Build Artifact
+  #     - name: Get Client Build Artifact
+  #       uses: actions/download-artifact@v1
+  #       with:
+  #         name: client_build
+
+  #     - name: Configure AWS credentials
+  #       uses: aws-actions/configure-aws-credentials@v1
+  #       with:
+  #         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #         aws-region: ${{ env.AWS_REGION }}
+
+  #     - name: Deploy to S3
+  #       run: aws s3 sync . s3://${{ env.CLIENT_BUCKET_NAME }}
+  #       working-directory: client_build
+
+  api_deploy:
+    name: Deploy API
+    runs-on: ubuntu-latest
+    needs: [api_build_and_test]
+    # needs: [client_build_and_test, api_build_and_test]
+    steps:
+      - name: Get API Build Artifact
         uses: actions/download-artifact@v1
         with:
-          name: client_build
+          name: api_build
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -106,25 +130,15 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Deploy to S3
-        run: aws s3 sync . s3://${{ env.CLIENT_BUCKET_NAME }}
-        working-directory: client_build
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
 
-  api_deploy:
-      name: Deploy API
-      runs-on: ubuntu-latest
-      needs: [client_build_and_test, api_build_and_test]
-      steps:
-
-        - name: Get API Build Artifact
-          uses: actions/download-artifact@v1
-          with:
-            name: api_build
-
-        - name: Configure AWS credentials
-          uses: aws-actions/configure-aws-credentials@v1
-          with:
-            aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-            aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-            aws-region: ${{ env.AWS_REGION }}
-
+      - name: Build, tag, and push docker image to Amazon ECR
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: mern
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
+          docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG

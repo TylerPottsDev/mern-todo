@@ -1,7 +1,7 @@
 import { ValidatorMiddleware } from '../middlewares/validator';
 import { TodoModel } from '../models/Todo';
 import { YupSharedTypes, Yup } from '../lib/yup';
-import { ICreateTodoDTO } from '../../types/todo';
+import { ICreateTodoDTO } from '../types/todo';
 import { Request, Response } from 'express';
 import { NotFoundError } from '../errors';
 

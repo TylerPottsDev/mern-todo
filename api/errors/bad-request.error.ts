@@ -1,4 +1,4 @@
-import { ICustomHttpError } from '../../types/error';
+import { ICustomHttpError } from '../types/error';
 import { CustomHttpError } from './http.error';
 
 export class BadRequestError extends CustomHttpError {

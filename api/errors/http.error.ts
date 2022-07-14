@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import { ICustomHttpError } from '../../types/error';
+import { ICustomHttpError } from '../types/error';
 
 export class CustomHttpError extends Error implements ICustomHttpError {
   public statusCode: number;

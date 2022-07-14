@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { ITodo } from '../../types/todo';
+import { ITodo } from '../types/todo';
 
 
 const Schema = mongoose.Schema;

@@ -1,5 +1,5 @@
 import { CustomHttpError } from './http.error';
-import { ICustomHttpError } from '../../types/error';
+import { ICustomHttpError } from '../types/error';
 
 export class NotFoundError extends CustomHttpError {
   constructor(options?: Partial<ICustomHttpError>) {

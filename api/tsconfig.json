@@ -21,7 +21,7 @@
       "@Models/*": ["./models/*"],
       "@Middlewares/*": ["./middlewares/*"],
       "@Lib/*": ["./lib/*"],
-      "@SharedTypes/*": ["../types/*"]
+      "@SharedTypes/*": ["types/*"]
     }
   },
   "include": ["./**/*.ts"],
