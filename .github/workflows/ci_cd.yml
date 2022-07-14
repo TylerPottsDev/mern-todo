@@ -117,10 +117,10 @@ jobs:
     runs-on: ubuntu-latest
     # needs: [client_build_and_test, api_build_and_test]
     steps:
-      - name: Get API Build Artifact
-        uses: actions/download-artifact@v1
-        with:
-          name: api_build
+      # - name: Get API Build Artifact
+      #   uses: actions/download-artifact@v1
+      #   with:
+      #     name: api_build
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
