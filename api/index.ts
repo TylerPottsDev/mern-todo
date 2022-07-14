@@ -29,6 +29,11 @@ AwsSecretManager.attachToProcessEnv('MernProd').then(() => {
 		res.status(200).send('OK');
 	});
 
+	app.use('/health-check', (req, res) => {
+		console.log('health-check');
+		res.status(200).send('OK');
+	});
+
 	app.listen(port, () => {
 		console.log(`Started on ${port}`);
 	});
