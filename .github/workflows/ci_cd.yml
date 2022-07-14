@@ -3,8 +3,8 @@ name: CI/CD
 env:
   CLIENT_BUCKET_NAME: "mern-todo-hosting"
   AWS_REGION: "us-east-1"
-  CLIENT_WORKING_DIR: "client"
-  API_WORKING_DIR: "api"
+  CLIENT_WORKING_DIR: ${{ github.workspace }}/client
+  API_WORKING_DIR: ${{ github.workspace }}/api
   DOCKER_REGISTRY: 251588601444.dkr.ecr.us-east-1.amazonaws.com/mern
   LOCAL_TAG: mern:latest
   ECS_CONTAINER_NAME: mern-api-container
