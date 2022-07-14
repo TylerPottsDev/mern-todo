@@ -6,11 +6,13 @@ env:
   CLIENT_WORKING_DIR: ${{ github.workspace }}/client
   API_WORKING_DIR: ${{ github.workspace }}/api
   DOCKER_REGISTRY: 251588601444.dkr.ecr.us-east-1.amazonaws.com/mern
+  DOCKER_IMAGE_TAG: latest
+  DOCKER_ECR_IMAGE_URL: ${{ env.DOCKER_REGISTRY }}:${{ env.DOCKER_IMAGE_TAG} }
   LOCAL_TAG: mern:latest
   ECS_CONTAINER_NAME: mern-api-container
   ECS_CLUSTER_NAME: Mern-Cluster
   ECS_SERVICE_NAME: Mern-Service
-
+#  ${{ github.sha }}
 on:
   push:
     branches:
@@ -138,15 +140,9 @@ jobs:
 
       - name: Build, tag, and push docker image to Amazon ECR
         id: build-image
-        env:
-          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          REPOSITORY: mern
-          IMAGE_TAG: latest
-          # IMAGE_TAG: ${{ github.sha }}
         run: |
-          DOCKER_BUILDKIT=1 docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
-          docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
-          echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+          DOCKER_BUILDKIT=1 docker build -t ${{ env.DOCKER_ECR_IMAGE_URL }} .
+          docker push ${{ env.DOCKER_ECR_IMAGE_URL }}
 
       - name: ls
         run: ls -la
@@ -157,7 +153,7 @@ jobs:
         with:
           task-definition: ${{ env.API_WORKING_DIR }}/task-definition.json
           container-name: mern-api-container
-          image: ${{ steps.build-image.outputs.image }}
+          image: ${{ env.DOCKER_ECR_IMAGE_URL }}
       - name: Deploy Amazon ECS task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
