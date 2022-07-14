@@ -136,6 +136,9 @@ jobs:
       - name: LS
         run: ls -la
 
+      - name: CWD
+        run: cwd
+
       - name: Build, tag, and push docker image to Amazon ECR
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
