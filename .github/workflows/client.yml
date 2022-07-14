@@ -4,10 +4,6 @@ env:
   CLIENT_BUCKET_NAME: "mern-todo-hosting"
   AWS_REGION: "us-east-1"
 
-defaults:
-  run:
-    working-directory: client
-
 on:
   push:
     branches:
@@ -17,7 +13,9 @@ jobs:
   client_install_and_build:
     name: Install & Build Clinet
     runs-on: ubuntu-latest
-
+    defaults:
+      run:
+        working-directory: client
     steps:
       - uses: actions/checkout@v2
 
@@ -47,7 +45,7 @@ jobs:
       - name: Share artifact inside workflow
         uses: actions/upload-artifact@v1
         with:
-          name: client-build
+          name: client_build
           path: build
 
   # deploy:
