@@ -97,7 +97,8 @@ jobs:
   client_deploy:
     name: Deploy Client
     runs-on: ubuntu-latest
-    needs: [client_build_and_test, api_build_and_test]
+    needs: [client_build_and_test]
+    # needs: [client_build_and_test, api_build_and_test]
     steps:
       - name: Get Client Build Artifact
         uses: actions/download-artifact@v1
