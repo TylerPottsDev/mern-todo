@@ -15,18 +15,17 @@ AwsSecretManager.attachToProcessEnv('MernProd').then(() => {
 	app.use(cors());
 	console.log(111);
 
-	mongoose.connect(`mongodb://${process.env.DB_USER}:${process.env.DB_PASSWORD}@mern-db-cluster.cluster-cmsh7c30416b.us-east-1.docdb.amazonaws.com:27017/mern-todo?tls=true&replicaSet=rs0&readPreference=secondaryPreferred&retryWrites=false`, {
-		tlsCAFile: 'rds-combined-ca-bundle.pem'
-	}).then(() => {
+	// mongoose.connect(`mongodb://${process.env.DB_USER}:${process.env.DB_PASSWORD}@mern-db-cluster.cluster-cmsh7c30416b.us-east-1.docdb.amazonaws.com:27017/mern-todo?tls=true&replicaSet=rs0&readPreference=secondaryPreferred&retryWrites=false`, {
+	// 	tlsCAFile: 'rds-combined-ca-bundle.pem'
+	// }).then(() => {
 
-		console.log("Connected to MongoDB");
-	}).catch(console.error);
+	// 	console.log("Connected to MongoDB");
+	// }).catch(console.error);
 
 
 	app.use('/api', apiRouter);
 	app.use('/stress', (req, res) => {
 		console.log('stress');
-
 		res.status(200).send('OK');
 	});
 
