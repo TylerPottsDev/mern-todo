@@ -136,16 +136,19 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
-      - name: Build, tag, and push docker image to Amazon ECR
-        id: build-image
-        env:
-          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          REPOSITORY: mern
-          IMAGE_TAG: ${{ github.sha }}
-        run: |
-          DOCKER_BUILDKIT=1 docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
-          docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
-          echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+      # - name: Build, tag, and push docker image to Amazon ECR
+      #   id: build-image
+      #   env:
+      #     REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+      #     REPOSITORY: mern
+      #     IMAGE_TAG: ${{ github.sha }}
+      #   run: |
+      #     DOCKER_BUILDKIT=1 docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
+      #     docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+      #     echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+
+      - name: ls
+        run: ls -la
 
       - name: Fill in the new image ID in the Amazon ECS task definition
         id: task-def
@@ -153,8 +156,8 @@ jobs:
         with:
           task-definition: task-definition.json
           container-name: mern-api-container
-          image: ${{ steps.build-image.outputs.image }}
-
+          image: lastest
+# ${{ steps.build-image.outputs.image }}
       - name: Deploy Amazon ECS task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
