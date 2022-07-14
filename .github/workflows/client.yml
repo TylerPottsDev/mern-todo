@@ -7,7 +7,6 @@ env:
 
 defaults:
   run:
-    shell: bash
     working-directory: client
 
 on:
