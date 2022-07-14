@@ -1,9 +1,10 @@
-name: Client CI/CD
+name: CI/CD
 
 env:
   CLIENT_BUCKET_NAME: "mern-todo-hosting"
   AWS_REGION: "us-east-1"
   CLIENT_WORKING_DIR: "./client"
+  API_WORKING_DIR: "./api"
 
 on:
   push:
@@ -30,7 +31,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ${{ env.CLIENT_WORKING_DIR }}/node_modules
-          key: ${{ runner.os }}-${{ hashFiles('./client/package.json') }}
+          key: client-${{ runner.os }}-${{ hashFiles('./client/package.json') }}
 
       - name: Install app dependencies
         if: steps.client_node_modules_cache.outputs.cache-hit != 'true'
@@ -49,10 +50,48 @@ jobs:
           name: client_build
           path: ${{ env.CLIENT_WORKING_DIR }}/build
 
+  api_build_and_test:
+    name: Build & Test API
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ env.API_WORKING_DIR }}
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 16.x
+
+      - name: Cache "node_modules" directory
+        id: api_node_modules_cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.API_WORKING_DIR }}/node_modules
+          key: api-${{ runner.os }}-${{ hashFiles('./api/package.json') }}
+
+      - name: Install app dependencies
+        if: steps.api_node_modules_cache.outputs.cache-hit != 'true'
+        run: npm ci
+
+      - name: Build the App
+        run: npm run build
+
+      - name: Test the App
+        run: npm run test
+
+      # Share artifact inside workflow
+      - name: Share artifact inside workflow
+        uses: actions/upload-artifact@v3
+        with:
+          name: api_build
+          path: ${{ env.API_WORKING_DIR }}/build
+
   client_deploy:
     name: Deploy Client
     runs-on: ubuntu-latest
-    needs: [client_build_and_test]
+    needs: [client_build_and_test, api_build_and_test]
     steps:
 
       - name: Get Client Build Artifact
@@ -70,3 +109,22 @@ jobs:
       - name: Deploy to S3
         run: aws s3 sync . s3://${{ env.CLIENT_BUCKET_NAME }}
         working-directory: client_build
+
+  api_deploy:
+      name: Deploy API
+      runs-on: ubuntu-latest
+      needs: [client_build_and_test, api_build_and_test]
+      steps:
+
+        - name: Get API Build Artifact
+          uses: actions/download-artifact@v1
+          with:
+            name: api_build
+
+        - name: Configure AWS credentials
+          uses: aws-actions/configure-aws-credentials@v1
+          with:
+            aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+            aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+            aws-region: ${{ env.AWS_REGION }}
+

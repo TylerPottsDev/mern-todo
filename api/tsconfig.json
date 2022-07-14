@@ -3,6 +3,7 @@
     "esModuleInterop": true,
     "target": "ES6",
     "baseUrl": "./",
+    "outDir": "./dist",
     "allowJs": true,
     "skipLibCheck": true,
     "strict": false,
