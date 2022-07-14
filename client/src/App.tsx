@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-const api_base = "http://localhost:3001";
+const api_base = "http://mern-elb-1132660749.us-east-1.elb.amazonaws.com/api";
 
 function App() {
   const [todos, setTodos] = useState<any[]>([]);
