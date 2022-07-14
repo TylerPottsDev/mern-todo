@@ -50,11 +50,9 @@ jobs:
           path: ${{ env.CLIENT_WORKING_DIR }}/build
 
   client_deploy:
+    name: Deploy Client
     runs-on: ubuntu-latest
     needs: [client_build_and_test]
-    defaults:
-      run:
-        working-directory: ${{ env.CLIENT_WORKING_DIR }}
     steps:
 
       - name: Get Client Build Artifact
@@ -71,4 +69,4 @@ jobs:
 
       - name: Deploy to S3
         run: aws s3 sync . s3://${{ env.CLIENT_BUCKET_NAME }}
-
+        working-directory: client_build
