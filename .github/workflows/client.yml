@@ -37,8 +37,11 @@ jobs:
         if: steps.node_modules_cache_v1.outputs.cache-hit != 'true'
         run: npm install
 
+      - name: Test the App
+        run: npm run test
+
       - name: Build the App
-        run: ./node_modules/react-scripts/bin/react-scripts.js build
+        run: npm run build
 
       # Share artifact inside workflow
       - name: Share artifact inside workflow
@@ -46,17 +49,6 @@ jobs:
         with:
           name: client-build
           path: client_build
-
-  client_test:
-    needs: [client_install_and_build]
-    name: Test
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Run tests
-        run: ./node_modules/react-scripts/bin/react-scripts.js test
 
   # deploy:
   #   runs-on: ubuntu-latest
