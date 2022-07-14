@@ -11,7 +11,7 @@ on:
 
 jobs:
   client_install_and_build:
-    name: Install & Build Clinet
+    name: Install & Build Client
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -34,6 +34,9 @@ jobs:
       - name: Install app dependencies
         if: steps.node_modules_cache_v1.outputs.cache-hit != 'true'
         run: npm ci
+
+      - name: Ls
+        run: ls -la
 
       - name: Build the App
         run: npm run build
