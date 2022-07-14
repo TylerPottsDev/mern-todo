@@ -21,7 +21,7 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Cache "node_modules" directory
-        id: node_modules_cache_v1
+        id: node_modules_cache
         uses: actions/cache@v2
         with:
           path: node_modules
@@ -33,7 +33,7 @@ jobs:
           node-version: 16.x
 
       - name: Install app dependencies
-        if: steps.node_modules_cache_v1.outputs.cache-hit != 'true'
+        if: steps.node_modules_cache.outputs.cache-hit != 'true'
         run: npm ci
 
       - name: Build the App
