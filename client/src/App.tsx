@@ -18,7 +18,7 @@ function App() {
   };
 
   const completeTodo = async (id: string) => {
-    const data = await fetch(`${api_base}/todos/${id}/toggle`).then((res) =>
+    const data = await fetch(`${api_base}/todos/${id}/toggle-completion`).then((res) =>
       res.json()
     );
 
@@ -34,7 +34,7 @@ function App() {
   };
 
   const addTodo = async () => {
-    const data = await fetch(api_base + "/todo/new", {
+    const data = await fetch(api_base + "/todos", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -51,7 +51,7 @@ function App() {
   };
 
   const deleteTodo = async (id: string) => {
-    const data = await fetch(api_base + "/todo/delete/" + id, {
+    const data = await fetch(api_base + "/todos/" + id, {
       method: "DELETE",
     }).then((res) => res.json());
 
