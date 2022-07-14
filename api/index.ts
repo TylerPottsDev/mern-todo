@@ -13,29 +13,25 @@ AwsSecretManager.attachToProcessEnv('MernProd').then(() => {
 
 	app.use(express.json());
 	app.use(cors());
-	console.log(111);
 
-	// mongoose.connect(`mongodb://${process.env.DB_USER}:${process.env.DB_PASSWORD}@mern-db-cluster.cluster-cmsh7c30416b.us-east-1.docdb.amazonaws.com:27017/mern-todo?tls=true&replicaSet=rs0&readPreference=secondaryPreferred&retryWrites=false`, {
-	// 	tlsCAFile: 'rds-combined-ca-bundle.pem'
-	// }).then(() => {
+	mongoose.connect(`mongodb://${process.env.DB_USER}:${process.env.DB_PASSWORD}@mern-db-cluster.cluster-cmsh7c30416b.us-east-1.docdb.amazonaws.com:27017/mern-todo?tls=true&replicaSet=rs0&readPreference=secondaryPreferred&retryWrites=false`, {
+		tlsCAFile: 'rds-combined-ca-bundle.pem'
+	}).then(() => {
 
-	// 	console.log("Connected to MongoDB");
-	// }).catch(console.error);
+		console.log("Connected to MongoDB", new Date());
 
+		app.use('/api', apiRouter);
 
-	app.use('/api', apiRouter);
-	
-	app.get('/stress', (req, res) => {
-		console.log('stress');
-		res.status(200).send('OK');
-	});
+		app.get('/stress', (req, res) => {
+			res.status(200).send('OK');
+		});
 
-	app.get('/health-check', (req, res) => {
-		console.log('health-check');
-		res.status(200).send('OK');
-	});
+		app.get('/health-check', (req, res) => {
+			res.status(200).send('OK');
+		});
 
-	app.listen(port, () => {
-		console.log(`Started on ${port}`);
-	});
+		app.listen(port, () => {
+			console.log(`Started on ${port}`);
+		});
+	}).catch(console.error);
 });

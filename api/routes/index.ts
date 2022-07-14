@@ -3,6 +3,6 @@ import { todoRouter } from './todos';
 
 const apiRouter = express.Router();
 
-apiRouter.use('/todo', todoRouter);
+apiRouter.use('/todos', todoRouter);
 
 export { apiRouter };
