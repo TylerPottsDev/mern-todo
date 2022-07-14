@@ -7,6 +7,9 @@ env:
   API_WORKING_DIR: "api"
   DOCKER_REGISTRY: 251588601444.dkr.ecr.us-east-1.amazonaws.com/mern
   LOCAL_TAG: mern:latest
+  ECS_CONTAINER_NAME: mern-api-container
+  ECS_CLUSTER_NAME: Mern-Cluster
+  ECS_SERVICE_NAME: Mern-Service
 
 on:
   push:
@@ -122,7 +125,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      ############ Move it to first step instead artifacts
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -135,6 +137,7 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v1
 
       - name: Build, tag, and push docker image to Amazon ECR
+        id: build-image
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           REPOSITORY: mern
@@ -142,4 +145,19 @@ jobs:
         run: |
           DOCKER_BUILDKIT=1 docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
-        ###########
+
+      - name: Fill in the new image ID in the Amazon ECS task definition
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: task-definition.json
+          container-name: mern-api-container
+          image: ${{ steps.build-image.outputs.image }}
+
+      - name: Deploy Amazon ECS task definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          cluster: ${{ env.ECS_CLUSTER_NAME }}
+          service: ${{ env.ECS_SERVICE_NAME }}
+          wait-for-service-stability: true
