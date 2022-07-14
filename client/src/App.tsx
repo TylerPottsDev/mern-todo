@@ -105,7 +105,7 @@ function App() {
               value={newTodo}
             />
             <div className="button" onClick={addTodo}>
-              Create Task
+              Create new Task
             </div>
           </div>
         </div>

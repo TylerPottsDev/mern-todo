@@ -12,7 +12,7 @@ on:
 
 jobs:
   client_build_and_test:
-    name: Install & Build Client
+    name: Build & Test Client
     runs-on: ubuntu-latest
     defaults:
       run:
