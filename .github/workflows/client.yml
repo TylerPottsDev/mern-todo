@@ -29,8 +29,8 @@ jobs:
         id: client_node_modules_cache
         uses: actions/cache@v3
         with:
-          path: node_modules
-          key: ${{ runner.os }}-${{ hashFiles('${{ env.CLIENT_WORKING_DIR }}/client/package.json') }}
+          path: ${{ env.CLIENT_WORKING_DIR }}/node_modules
+          key: ${{ runner.os }}-${{ hashFiles('./client/package.json') }}
 
       - name: Install app dependencies
         if: steps.client_node_modules_cache.outputs.cache-hit != 'true'
