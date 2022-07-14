@@ -24,12 +24,13 @@ AwsSecretManager.attachToProcessEnv('MernProd').then(() => {
 
 
 	app.use('/api', apiRouter);
-	app.use('/stress', (req, res) => {
+	
+	app.get('/stress', (req, res) => {
 		console.log('stress');
 		res.status(200).send('OK');
 	});
 
-	app.use('/health-check', (req, res) => {
+	app.get('/health-check', (req, res) => {
 		console.log('health-check');
 		res.status(200).send('OK');
 	});
