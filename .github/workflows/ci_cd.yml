@@ -7,7 +7,6 @@ env:
   API_WORKING_DIR: ${{ github.workspace }}/api
   DOCKER_REGISTRY: 251588601444.dkr.ecr.us-east-1.amazonaws.com/mern
   DOCKER_IMAGE_TAG: latest
-  DOCKER_ECR_IMAGE_URL: ${{ env.DOCKER_REGISTRY }}:${{ env.DOCKER_IMAGE_TAG }}
   LOCAL_TAG: mern:latest
   ECS_CONTAINER_NAME: mern-api-container
   ECS_CLUSTER_NAME: Mern-Cluster
@@ -140,6 +139,8 @@ jobs:
 
       - name: Build, tag, and push docker image to Amazon ECR
         id: build-image
+        env:
+           DOCKER_ECR_IMAGE_URL: ${{ env.DOCKER_REGISTRY }}:${{ env.DOCKER_IMAGE_TAG }}
         run: |
           DOCKER_BUILDKIT=1 docker build -t ${{ env.DOCKER_ECR_IMAGE_URL }} .
           docker push ${{ env.DOCKER_ECR_IMAGE_URL }}
@@ -149,6 +150,8 @@ jobs:
 
       - name: Fill in the new image ID in the Amazon ECS task definition
         id: task-def
+        env:
+           DOCKER_ECR_IMAGE_URL: ${{ env.DOCKER_REGISTRY }}:${{ env.DOCKER_IMAGE_TAG }}
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
           task-definition: ${{ env.API_WORKING_DIR }}/task-definition.json
