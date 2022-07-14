@@ -1,9 +1,8 @@
 name: Client CI/CD
 
-env: 
-  CLIENT_BUCKET_NAME: 'mern-todo-hosting'
-  AWS_REGION: 'us-east-1'
-  
+env:
+  CLIENT_BUCKET_NAME: "mern-todo-hosting"
+  AWS_REGION: "us-east-1"
 
 defaults:
   run:
@@ -15,8 +14,8 @@ on:
       - ci
 
 jobs:
-  install:
-    name: Install
+  client_install_and_build:
+    name: Install & Build Clinet
     runs-on: ubuntu-latest
 
     steps:
@@ -26,8 +25,7 @@ jobs:
         id: node_modules_cache_v1
         uses: actions/cache@v2
         with:
-          path: |
-            node_modules
+          path: node_modules
           key: ${{ runner.os }}-${{ hashFiles('package.json') }}
 
       - name: Setup Node.js
@@ -39,17 +37,18 @@ jobs:
         if: steps.node_modules_cache_v1.outputs.cache-hit != 'true'
         run: npm install
 
-  build:
-    needs: [install]
-    name: Build
-    runs-on: ubuntu-latest
-
-    steps:
       - name: Build the App
         run: ./node_modules/react-scripts/bin/react-scripts.js build
 
-  test:
-    needs: [build]
+      # Share artifact inside workflow
+      - name: Share artifact inside workflow
+        uses: actions/upload-artifact@v1
+        with:
+          name: client-build
+          path: client_build
+
+  client_test:
+    needs: [client_install_and_build]
     name: Test
     runs-on: ubuntu-latest
 
@@ -60,18 +59,24 @@ jobs:
         run: ./node_modules/react-scripts/bin/react-scripts.js test
 
   # deploy:
-  #   needs: [test]
-  #   name: Upload to Amazon S3
   #   runs-on: ubuntu-latest
-  #   permissions:
-  #     id-token: write
-  #     contents: read
-
+  #   # When application is successfully tested and build has been generated
+  #   # Then we can start with deployment
+  #   needs: [client_test]
   #   steps:
-  #     - uses: actions/checkout@v2
-
+  #     # Download previously shared build
+  #     - name: Get artifact
+  #       uses: actions/download-artifact@v1
+  #       with:
+  #         name: react-github-actions-build
+  #     # Set the credentials from repository settings/secrets
   #     - name: Configure AWS credentials
-  #     uses: aws-actions/configure-aws-credentials@v1
-  #     with:
-  #       role-to-assume: arn:aws:iam::111111111111:role/my-github-actions-role-test
-  #       aws-region: us-east-1
+  #       uses: aws-actions/configure-aws-credentials@v1
+  #       with:
+  #         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #         aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
+  #     # Copy the files from build folder to the S3 bucket
+  #     - name: Deploy to S3
+  #       run: aws s3 sync . s3://react-github-actions --acl public-read
+  #       working-directory: react-github-actions-build
