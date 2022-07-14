@@ -7,7 +7,7 @@ env:
   API_WORKING_DIR: ${{ github.workspace }}/api
   DOCKER_REGISTRY: 251588601444.dkr.ecr.us-east-1.amazonaws.com/mern
   DOCKER_IMAGE_TAG: latest
-  DOCKER_ECR_IMAGE_URL: ${{ env.DOCKER_REGISTRY }}:${{ env.DOCKER_IMAGE_TAG} }
+  DOCKER_ECR_IMAGE_URL: ${{ env.DOCKER_REGISTRY }}:${{ env.DOCKER_IMAGE_TAG }}
   LOCAL_TAG: mern:latest
   ECS_CONTAINER_NAME: mern-api-container
   ECS_CLUSTER_NAME: Mern-Cluster
