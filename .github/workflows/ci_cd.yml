@@ -14,7 +14,7 @@ env:
 on:
   push:
     branches:
-      - ci
+      - main
 
 jobs:
   client_build_and_test:
