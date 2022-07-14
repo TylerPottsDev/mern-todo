@@ -52,43 +52,43 @@ jobs:
   #         name: client_build
   #         path: ${{ env.CLIENT_WORKING_DIR }}/build
 
-  api_build_and_test:
-    name: Build & Test API
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ${{ env.API_WORKING_DIR }}
-    steps:
-      - uses: actions/checkout@v2
+  # api_build_and_test:
+  #   name: Build & Test API
+  #   runs-on: ubuntu-latest
+  #   defaults:
+  #     run:
+  #       working-directory: ${{ env.API_WORKING_DIR }}
+  #   steps:
+  #     - uses: actions/checkout@v2
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v1
-        with:
-          node-version: 16.x
+  #     - name: Setup Node.js
+  #       uses: actions/setup-node@v1
+  #       with:
+  #         node-version: 16.x
 
-      - name: Cache "node_modules" directory
-        id: api_node_modules_cache
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.API_WORKING_DIR }}/node_modules
-          key: api-${{ runner.os }}-${{ hashFiles('./api/package.json') }}
+  #     - name: Cache "node_modules" directory
+  #       id: api_node_modules_cache
+  #       uses: actions/cache@v3
+  #       with:
+  #         path: ${{ env.API_WORKING_DIR }}/node_modules
+  #         key: api-${{ runner.os }}-${{ hashFiles('./api/package.json') }}
 
-      - name: Install app dependencies
-        if: steps.api_node_modules_cache.outputs.cache-hit != 'true'
-        run: npm ci
+  #     - name: Install app dependencies
+  #       if: steps.api_node_modules_cache.outputs.cache-hit != 'true'
+  #       run: npm ci
 
-      - name: Build the App
-        run: npm run build
+  #     - name: Build the App
+  #       run: npm run build
 
-      - name: Test the App
-        run: npm run test
+  #     - name: Test the App
+  #       run: npm run test
 
-      # Share artifact inside workflow
-      - name: Share artifact inside workflow
-        uses: actions/upload-artifact@v3
-        with:
-          name: api_build
-          path: ${{ env.API_WORKING_DIR }}/build
+  #     # Share artifact inside workflow
+  #     - name: Share artifact inside workflow
+  #       uses: actions/upload-artifact@v3
+  #       with:
+  #         name: api_build
+  #         path: ${{ env.API_WORKING_DIR }}/build
 
   # client_deploy:
   #   name: Deploy Client
@@ -115,7 +115,6 @@ jobs:
   api_deploy:
     name: Deploy API
     runs-on: ubuntu-latest
-    needs: [api_build_and_test]
     # needs: [client_build_and_test, api_build_and_test]
     steps:
       - name: Get API Build Artifact
@@ -140,5 +139,5 @@ jobs:
           REPOSITORY: mern
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG ${{ env.API_WORKING_DIR }}
+          docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG ./${{ env.API_WORKING_DIR }}/
           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
