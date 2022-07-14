@@ -16,8 +16,8 @@ on:
       - ci
 
 jobs:
-  build:
-    name: Build
+  install:
+    name: Install
     runs-on: ubuntu-latest
 
     steps:
@@ -40,6 +40,15 @@ jobs:
         if: steps.node_modules_cache_v1.outputs.cache-hit != 'true'
         run: npm install
 
+  build:
+    needs: [install]
+    name: Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Build the App
+        run: npm build
+
   test:
     needs: [build]
     name: Test
@@ -52,7 +61,7 @@ jobs:
         run: npm test
 
   # deploy:
-  #   needs: [build]
+  #   needs: [test]
   #   name: Upload to Amazon S3
   #   runs-on: ubuntu-latest
   #   permissions:
