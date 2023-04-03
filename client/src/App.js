@@ -17,12 +17,12 @@ function App() {
 			.catch((err) => console.error("Error: ", err));
 	}
 
-	const completeTodo = async (id: string) => {
+	const completeTodo = async (id) => {
 	  const response = await fetch(api + "/todo/complete/" + id);
 	  const data = await response.json();
 
-	  setTodos((todos: any) =>
-	    todos.map((todo: Todo) => {
+	  setTodos((todos) =>
+	    todos.map((todo) => {
 	      if (todo._id === data._id) {
 		todo.complete = data.complete;
 	      }
@@ -30,6 +30,7 @@ function App() {
 	    })
 	  );
 	};
+
 
 	const addTodo = async () => {
 		const data = await fetch(api_base + "/todo/new", {
